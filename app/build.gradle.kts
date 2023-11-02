@@ -3,6 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+
+    id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -32,11 +35,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_19
-        targetCompatibility = JavaVersion.VERSION_19
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "19"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -69,5 +72,12 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.4")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
 
+    // Hilt
+    implementation ("com.google.dagger:hilt-android:2.48.1")
+    ksp ("com.google.dagger:hilt-compiler:2.48")
+    implementation ("androidx.hilt:hilt-compiler:1.1.0")
 
+    // Hilt Compose
+    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation ("org.jetbrains.kotlin:kotlin-reflect:1.9.10")
 }
