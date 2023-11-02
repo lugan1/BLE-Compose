@@ -1,4 +1,4 @@
-package com.example.blecomposestudy.domain
+package com.softnet.blecompose.domain.dto
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt

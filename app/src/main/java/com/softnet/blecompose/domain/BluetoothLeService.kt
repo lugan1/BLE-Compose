@@ -1,6 +1,7 @@
 package com.example.blecomposestudy.domain
 
 import android.bluetooth.BluetoothDevice
+import com.softnet.blecompose.domain.dto.ConnectionState
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 

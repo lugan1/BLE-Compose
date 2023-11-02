@@ -10,12 +10,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.blecomposestudy.compose.MainScreen
-import com.example.blecomposestudy.domain.ConnectionState
-import com.softnet.blecompose.domain.BluetoothLeServiceImpl
+import com.softnet.blecompose.domain.dto.ConnectionState
+import com.softnet.blecompose.domain.impl.BluetoothLeServiceImpl
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.UUID
 

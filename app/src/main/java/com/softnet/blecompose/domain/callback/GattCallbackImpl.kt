@@ -1,13 +1,9 @@
-package com.example.blecomposestudy.domain
+package com.softnet.blecompose.domain.callback
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.core.app.ActivityCompat
+import com.softnet.blecompose.domain.dto.ConnectionState
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 

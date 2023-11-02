@@ -1,4 +1,4 @@
-package com.softnet.blecompose.domain
+package com.softnet.blecompose.domain.impl
 
 import android.Manifest
 import android.app.Service
@@ -14,14 +14,12 @@ import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.example.blecomposestudy.domain.BluetoothLeService
-import com.example.blecomposestudy.domain.ConnectionState
-import com.example.blecomposestudy.domain.GattCallbackImpl
+import com.softnet.blecompose.domain.callback.GattCallbackImpl
+import com.softnet.blecompose.domain.dto.ConnectionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 import java.util.UUID
 
 class BluetoothLeServiceImpl : Service(), BluetoothLeService {
