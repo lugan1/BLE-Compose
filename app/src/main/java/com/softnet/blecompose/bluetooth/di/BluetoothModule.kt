@@ -7,6 +7,7 @@ import com.softnet.blecompose.bluetooth.BluetoothLeService
 import com.softnet.blecompose.bluetooth.CheckService
 import com.softnet.blecompose.bluetooth.ScanService
 import com.softnet.blecompose.bluetooth.callback.GattCallbackImpl
+import com.softnet.blecompose.bluetooth.callback.ScanCallbackImpl
 import com.softnet.blecompose.bluetooth.impl.BluetoothLeServiceImpl
 import com.softnet.blecompose.bluetooth.impl.CheckServiceImpl
 import com.softnet.blecompose.bluetooth.impl.ScanServiceImpl
@@ -34,6 +35,14 @@ object BluetoothModule {
 
     @Singleton
     @Provides
+    fun provideScanCallback(): ScanCallbackImpl = ScanCallbackImpl()
+
+    @Singleton
+    @Provides
+    fun provideGattCallback(): GattCallbackImpl = GattCallbackImpl()
+
+    @Singleton
+    @Provides
     fun provideCheckService(@ApplicationContext context: Context): CheckService {
         return CheckServiceImpl(context)
     }
@@ -42,17 +51,15 @@ object BluetoothModule {
     @Provides
     fun provideScanService(
         checkService: CheckService,
-        bluetoothManager: BluetoothManager
+        bluetoothManager: BluetoothManager,
+        callback: ScanCallbackImpl
     ): ScanService {
         return ScanServiceImpl(
             check = checkService,
-            scanner = bluetoothManager.adapter.bluetoothLeScanner
+            scanner = bluetoothManager.adapter.bluetoothLeScanner,
+            callback = callback
         )
     }
-
-    @Singleton
-    @Provides
-    fun provideGattCallback(): GattCallbackImpl = GattCallbackImpl()
 
     @Singleton
     @Provides

@@ -9,4 +9,5 @@ interface ScanService {
     val isScanning: Boolean
     fun startScan(): Flow<ScanResult>
     fun startScan(filters: List<ScanFilter>, settings: ScanSettings): Flow<ScanResult>
+    fun stopScan()
 }

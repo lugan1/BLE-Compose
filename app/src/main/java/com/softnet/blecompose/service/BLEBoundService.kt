@@ -1,4 +1,4 @@
-package com.softnet.blecompose
+package com.softnet.blecompose.service
 
 import android.app.Service
 import android.bluetooth.BluetoothDevice

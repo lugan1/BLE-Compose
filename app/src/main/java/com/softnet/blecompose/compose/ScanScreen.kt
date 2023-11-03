@@ -1,4 +1,4 @@
-package com.example.blecomposestudy.compose
+package com.softnet.blecompose.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,13 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-
 @Composable
-fun MainScreen(
+fun ScanScreen(
     bindService: () -> Unit = {},
-    connect: () -> Unit = {},
-    disconnect: () -> Unit = {},
-    write: () -> Unit = {}
+    onScan: () -> Unit = {},
+    onStop: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -31,23 +29,18 @@ fun MainScreen(
             Text(text = "Bind Service")
         }
 
-
-        Button(onClick = connect) {
-            Text(text = "Connect")
+        Button(onClick = onScan) {
+            Text(text = "Scan")
         }
 
-        Button(onClick = disconnect) {
-            Text(text = "Disconnect")
-        }
-
-        Button(onClick = write) {
-            Text(text = "Write")
+        Button(onClick = onStop) {
+            Text(text = "Stop")
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
-    MainScreen()
+fun ScanScreenPreview() {
+    ScanScreen()
 }

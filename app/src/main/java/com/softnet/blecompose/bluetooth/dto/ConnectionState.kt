@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 
 sealed interface ConnectionState {
-    object Connecting: ConnectionState
-    object Connected: ConnectionState
-    object Disconnecting: ConnectionState
-    object Disconnected: ConnectionState
-    object UnlikelyError: ConnectionState
-    object ConnectionFail: ConnectionState
-    object ConnectFailedTime: ConnectionState
+    data object Connecting: ConnectionState
+    data object Connected: ConnectionState
+    data object Disconnecting: ConnectionState
+    data object Disconnected: ConnectionState
+    data object UnlikelyError: ConnectionState
+    data object ConnectionFail: ConnectionState
+    data object ConnectFailedTime: ConnectionState
     data class ConnectFailedUnknown(val status: Int): ConnectionState
     data class UnknownState(val newState: Int, val status: Int): ConnectionState
 
