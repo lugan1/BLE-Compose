@@ -1,9 +1,10 @@
-package com.softnet.blecompose.domain.callback
+package com.softnet.blecompose.bluetooth.callback
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
-import com.softnet.blecompose.domain.dto.ConnectionState
+import android.bluetooth.BluetoothGattService
+import com.softnet.blecompose.bluetooth.dto.ConnectionState
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -21,7 +22,7 @@ class GattCallbackImpl: BluetoothGattCallback() {
         )
 
     val onServiceDiscovered =
-        MutableSharedFlow<Unit>(
+        MutableSharedFlow<List<BluetoothGattService>>(
             replay = 1,
             onBufferOverflow = BufferOverflow.DROP_OLDEST
         )
@@ -32,7 +33,9 @@ class GattCallbackImpl: BluetoothGattCallback() {
     }
 
     override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-        onServiceDiscovered.tryEmit(Unit)
+        gatt?.run {
+            onServiceDiscovered.tryEmit(services)
+        }
     }
 
     override fun onCharacteristicChanged(

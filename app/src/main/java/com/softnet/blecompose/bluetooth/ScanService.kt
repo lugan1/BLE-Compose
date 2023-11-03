@@ -1,9 +1,8 @@
-package com.softnet.temperature.core.bluetooth
+package com.softnet.blecompose.bluetooth
 
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
-import com.softnet.temperature.core.bluetooth.dto.ScanResultDto
 import kotlinx.coroutines.flow.Flow
 
 interface ScanService {

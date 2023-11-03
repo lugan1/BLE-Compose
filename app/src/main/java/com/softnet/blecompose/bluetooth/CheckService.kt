@@ -1,13 +1,9 @@
-package com.softnet.blecompose.domain
+package com.softnet.blecompose.bluetooth
 
-
-interface CheckBluetooth {
+interface CheckService {
     val isSupported: Boolean
-
     val isEnabled: Boolean
-
-    //val bluetoothPermissions: List<Permission>
-
+    val bluetoothPermissions: List<String>
     val permissionGranted: Boolean
     fun beforeBluetoothFlow()
 }

@@ -1,4 +1,4 @@
-package com.softnet.blecompose.domain.dto
+package com.softnet.blecompose.bluetooth.dto
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt

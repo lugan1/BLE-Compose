@@ -1,4 +1,4 @@
-package com.softnet.temperature.core.bluetooth.dto
+package com.softnet.blecompose.bluetooth.dto
 
 import android.annotation.SuppressLint
 import android.bluetooth.le.ScanResult

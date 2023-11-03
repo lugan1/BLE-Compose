@@ -1,4 +1,4 @@
-package com.softnet.temperature.core.bluetooth.dto
+package com.softnet.blecompose.bluetooth.dto
 
 data class ScanResultDto(
     val name: String = "Unknown",

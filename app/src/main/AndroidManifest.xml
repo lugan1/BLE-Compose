@@ -28,6 +28,7 @@
         tools:targetApi="s" />
 
     <application
+        android:name=".BLEApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -38,7 +39,7 @@
         android:theme="@style/Theme.BLECompose"
         tools:targetApi="31" >
         <service
-            android:name=".domain.impl.BluetoothLeServiceImpl"
+            android:name=".TestServiceImpl"
             android:enabled="true"
             android:exported="true" >
         </service>

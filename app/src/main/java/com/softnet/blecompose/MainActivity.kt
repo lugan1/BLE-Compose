@@ -1,5 +1,6 @@
 package com.softnet.blecompose
 
+import android.bluetooth.BluetoothGattCharacteristic
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -10,21 +11,27 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.blecomposestudy.compose.MainScreen
-import com.softnet.blecompose.domain.dto.ConnectionState
-import com.softnet.blecompose.domain.impl.BluetoothLeServiceImpl
+import com.softnet.blecompose.bluetooth.dto.ConnectionState
+import com.softnet.blecompose.bluetooth.specification.DescriptorUUID
+import com.softnet.blecompose.bluetooth.specification.ServiceUUID
+import com.softnet.blecompose.bluetooth.specification.characteristic.CharacteristicUUID
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private var connectServiceImpl : BluetoothLeServiceImpl? = null
+    private var connectServiceImpl : TestServiceImpl? = null
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Log.e("MainActivity", "onServiceConnected: ")
-            val binder = service as BluetoothLeServiceImpl.LocalBinder
+            val binder = service as TestServiceImpl.LocalBinder
             binder.getService().let { bindService -> connectServiceImpl = bindService }
         }
 
@@ -33,6 +40,8 @@ class MainActivity : ComponentActivity() {
             connectServiceImpl = null
         }
     }
+
+    private var rxCharacteristic: BluetoothGattCharacteristic? = null
 
 
     @OptIn(FlowPreview::class)
@@ -43,7 +52,7 @@ class MainActivity : ComponentActivity() {
 
             MainScreen(
                 bindService = {
-                    val gattServiceIntent = Intent(this, BluetoothLeServiceImpl::class.java)
+                    val gattServiceIntent = Intent(this, TestServiceImpl::class.java)
                     bindService(gattServiceIntent, serviceConnection, BIND_AUTO_CREATE)
                 },
                 connect = {
@@ -51,19 +60,21 @@ class MainActivity : ComponentActivity() {
                         scope.launch {
                             service.connect("D3:72:6C:76:16:63")
                                 .filter { it == ConnectionState.Connected }
-                                .flatMapConcat {
-                                    service.discoverServices()
-                                }
-                                .flatMapConcat {
-                                    service.characteristicNotification(
-                                        UUID.fromString(NORDIC_UART_SERVICE),
-                                        UUID.fromString(TX_CHARACTERISTIC),
-                                        UUID.fromString(TX_CHARACTERISTIC_DESCRIPTOR),
-                                        true
-                                    )
+                                .flatMapConcat { service.discoverServices() }
+                                .flatMapConcat { services ->
+                                    val nordicService = services.find { it.uuid.toString() == ServiceUUID.NORDIC_UART_SERVICE.uuid }
+                                    val flow: Flow<Unit>? = nordicService?.let {
+                                        rxCharacteristic = it.characteristics.find { it.uuid.toString() == CharacteristicUUID.RX_CHARACTERISTIC.uuid }
+                                        val txCharacteristic = it.characteristics.find { it.uuid.toString() == CharacteristicUUID.TX_CHARACTERISTIC.uuid }
+                                        val descriptor = txCharacteristic?.descriptors?.find { it.uuid.toString() == DescriptorUUID.CLIENT_CHARACTERISTIC_CONFIGURATION.uuid }
+                                        descriptor?.let {
+                                            connectServiceImpl?.characteristicNotification(txCharacteristic, descriptor, true)
+                                        }
+                                    }
+                                    flow ?: flow { emit(Unit) }
                                 }
                                 .collect {
-                                    Log.e("MainActivity", "onCreate: ${it.javaClass.simpleName}")
+                                    Log.e("MainActivity", "onCreate: $it")
                                 }
                         }
                     }
@@ -72,13 +83,12 @@ class MainActivity : ComponentActivity() {
                     connectServiceImpl?.disconnect()
                 },
                 write = {
-                    scope.launch {
-                        connectServiceImpl?.writeCharacteristic(
-                            UUID.fromString(NORDIC_UART_SERVICE),
-                            UUID.fromString(RX_CHARACTERISTIC),
-                            "gdal".toByteArray()
-                        )?.collect {
-                            Log.e("MainActivity", "onCreate: ${it.contentToString()}")
+                    rxCharacteristic?.let { characteristic ->
+                        scope.launch {
+                            connectServiceImpl?.writeCharacteristic(characteristic, "gdal".toByteArray())
+                                ?.collect {
+                                    Log.e("MainActivity", "glal: ${it.contentToString()}")
+                                }
                         }
                     }
                 }
@@ -89,12 +99,5 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService(serviceConnection)
-    }
-
-    companion object {
-        const val NORDIC_UART_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
-        const val RX_CHARACTERISTIC = "6e400002-b5a3-f393-e0a9-e50e24dcca9e" // 쓰기용 특성
-        const val TX_CHARACTERISTIC = "6e400003-b5a3-f393-e0a9-e50e24dcca9e" // 알림용 특성 (읽기)
-        const val TX_CHARACTERISTIC_DESCRIPTOR = "00002902-0000-1000-8000-00805f9b34fb"
     }
 }
