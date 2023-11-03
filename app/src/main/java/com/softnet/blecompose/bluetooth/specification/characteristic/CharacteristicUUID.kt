@@ -39,8 +39,8 @@ enum class CharacteristicUUID(val uuid: String) {
 
     // Nordic Semiconductor
     BUTTON_LESS_DFU("8ec90003-f315-4f60-9fb8-838830daea50"),
-    TX_CHARACTERISTIC("6e400002-b5a3-f393-e0a9-e50e24dcca9e"),
-    RX_CHARACTERISTIC("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    RX_CHARACTERISTIC("6e400002-b5a3-f393-e0a9-e50e24dcca9e"),
+    TX_CHARACTERISTIC("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
     companion object {
         fun from(uuid: String): CharacteristicUUID {

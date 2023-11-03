@@ -17,70 +17,55 @@ import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TestServiceImpl: Service(), BluetoothLeService {
+class BLEBoundService: Service(), BluetoothLeService {
     @Inject lateinit var bluetoothLE : BluetoothLeService
+
     private val binder = LocalBinder()
 
     inner class LocalBinder : Binder() {
-        fun getService(): TestServiceImpl {
-            return this@TestServiceImpl
-        }
+        fun getService(): BLEBoundService = this@BLEBoundService
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        return binder
-    }
+    override fun onBind(intent: Intent): IBinder = binder
 
     override fun unbindService(conn: ServiceConnection) {
         super.unbindService(conn)
         disconnect()
     }
 
-    override fun connect(address: String): Flow<ConnectionState> {
-        TODO()
-    }
+    override fun connect(address: String): Flow<ConnectionState> = bluetoothLE.connect(address)
 
-    override fun connect(device: BluetoothDevice): Flow<ConnectionState> {
-        TODO()
-    }
+    override fun connect(device: BluetoothDevice): Flow<ConnectionState> = bluetoothLE.connect(device)
 
-    override fun discoverServices(): Flow<List<BluetoothGattService>> {
-        TODO()
-    }
+    override fun discoverServices(): Flow<List<BluetoothGattService>> = bluetoothLE.discoverServices()
 
-    override fun onConnectionStateChange(): Flow<ConnectionState> {
-        TODO()
-    }
+    override fun onConnectionStateChange(): Flow<ConnectionState> = bluetoothLE.onConnectionStateChange()
 
-    override fun disconnect() {
-        TODO()
-    }
+    override fun disconnect() = bluetoothLE.disconnect()
 
-    override fun characteristicNotification(serviceUUID: UUID, characteristicUUID: UUID, descriptorUUID: UUID, value: Boolean): Flow<Unit> {
-        TODO()
-    }
+    override fun characteristicNotification(
+        serviceUUID: UUID,
+        characteristicUUID: UUID,
+        descriptorUUID: UUID,
+        value: Boolean
+    ): Flow<Unit> = bluetoothLE.characteristicNotification(serviceUUID, characteristicUUID, descriptorUUID, value)
 
     override fun characteristicNotification(
         characteristic: BluetoothGattCharacteristic,
         descriptor: BluetoothGattDescriptor,
         value: Boolean
-    ): Flow<Unit> {
-        TODO()
-    }
+    ): Flow<Unit> = bluetoothLE.characteristicNotification(characteristic, descriptor, value)
 
 
     override fun writeCharacteristic(
         serviceUUID: UUID,
         characteristicUUID: UUID,
         data: ByteArray
-    ): Flow<ByteArray> {
-        TODO()
-    }
+    ): Flow<ByteArray> = bluetoothLE.writeCharacteristic(serviceUUID, characteristicUUID, data)
 
     override fun writeCharacteristic(
         characteristic: BluetoothGattCharacteristic,
         data: ByteArray
-    ): Flow<ByteArray> {
-        TODO()
-    }
+    ): Flow<ByteArray> = bluetoothLE.writeCharacteristic(characteristic, data)
+
 }

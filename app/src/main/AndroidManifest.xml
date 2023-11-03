@@ -39,7 +39,7 @@
         android:theme="@style/Theme.BLECompose"
         tools:targetApi="31" >
         <service
-            android:name=".TestServiceImpl"
+            android:name=".BLEBoundService"
             android:enabled="true"
             android:exported="true" >
         </service>

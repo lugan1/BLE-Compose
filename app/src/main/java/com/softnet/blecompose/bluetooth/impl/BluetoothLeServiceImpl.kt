@@ -1,18 +1,16 @@
 package com.softnet.blecompose.bluetooth.impl
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
-import androidx.core.app.ActivityCompat
 import com.softnet.blecompose.bluetooth.BluetoothLeService
+import com.softnet.blecompose.bluetooth.CheckService
 import com.softnet.blecompose.bluetooth.callback.GattCallbackImpl
 import com.softnet.blecompose.bluetooth.dto.ConnectionState
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -22,74 +20,70 @@ import java.util.UUID
 import javax.inject.Inject
 
 class BluetoothLeServiceImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val checkService: CheckService,
+    private val adapter: BluetoothAdapter?,
+    private val callback: GattCallbackImpl
 ): BluetoothLeService {
     private var gatt: BluetoothGatt? = null
-    private var manager: BluetoothManager? = null
-    private var adapter: BluetoothAdapter? = null
-    private val gattCallback = GattCallbackImpl()
 
-
+    @SuppressLint("MissingPermission")
     override fun connect(address: String): Flow<ConnectionState> {
-        if(adapter == null) {
-            throw Exception("BluetoothAdapter is null")
-        }
-
+        checkService.beforeBluetoothFlow()
         adapter?.getRemoteDevice(address)?.let { device ->
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                throw Exception("Permission not granted")
+            if(gatt != null) {
+                gatt?.disconnect()
             }
 
-            gatt = device.connectGatt(context, false, gattCallback)
+            gatt = device.connectGatt(context, false, callback)
         }
-        return gattCallback.onConnectionStateChange
+        return callback.onConnectionStateChange
     }
 
+    @SuppressLint("MissingPermission")
     override fun connect(device: BluetoothDevice): Flow<ConnectionState> {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            throw Exception("Permission not granted")
-        }
+        checkService.beforeBluetoothFlow()
+
         if(gatt != null) {
-            throw Exception("Gatt is not null")
+            gatt?.disconnect()
         }
 
-        gatt = device.connectGatt(context, false, gattCallback)
-        return gattCallback.onConnectionStateChange
+        gatt = device.connectGatt(context, false, callback)
+        return callback.onConnectionStateChange
     }
 
+    @SuppressLint("MissingPermission")
     override fun discoverServices(): Flow<List<BluetoothGattService>> {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            throw Exception("Permission not granted")
-        }
+        checkService.beforeBluetoothFlow()
+
         if(gatt == null) {
             throw Exception("Gatt is null")
         }
 
         gatt?.discoverServices()
-        return gattCallback.onServiceDiscovered
+        return callback.onServiceDiscovered
     }
 
     override fun onConnectionStateChange(): Flow<ConnectionState> {
-        return gattCallback.onConnectionStateChange
+        return callback.onConnectionStateChange
     }
 
+    @SuppressLint("MissingPermission")
     override fun disconnect() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-
+        checkService.beforeBluetoothFlow()
         gatt?.disconnect()
+        gatt?.close()
+        gatt = null
     }
 
+    @SuppressLint("MissingPermission")
     override fun characteristicNotification(
         serviceUUID: UUID,
         characteristicUUID: UUID,
         descriptorUUID: UUID,
         value: Boolean
     ): Flow<Unit> = flow {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            throw Exception("Permission not granted")
-        }
+        checkService.beforeBluetoothFlow()
 
         gatt?.run {
             val service = getService(serviceUUID)
@@ -108,14 +102,13 @@ class BluetoothLeServiceImpl @Inject constructor(
         emit(Unit)
     }
 
+    @SuppressLint("MissingPermission")
     override fun characteristicNotification(
         characteristic: BluetoothGattCharacteristic,
         descriptor: BluetoothGattDescriptor,
         value: Boolean
     ): Flow<Unit> = flow {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            throw Exception("Permission not granted")
-        }
+        checkService.beforeBluetoothFlow()
 
         gatt?.run {
             setCharacteristicNotification(characteristic, value)
@@ -132,14 +125,14 @@ class BluetoothLeServiceImpl @Inject constructor(
         emit(Unit)
     }
 
+    @SuppressLint("MissingPermission")
     override fun writeCharacteristic(
         serviceUUID: UUID,
         characteristicUUID: UUID,
         data: ByteArray
     ): Flow<ByteArray> {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            throw Exception("Permission not granted")
-        }
+        checkService.beforeBluetoothFlow()
+
         if(gatt == null) {
             throw Exception("Gatt is null")
         }
@@ -157,16 +150,16 @@ class BluetoothLeServiceImpl @Inject constructor(
             }
         }
 
-        return gattCallback.onCharacteristicChanged
+        return callback.onCharacteristicChanged
     }
 
+    @SuppressLint("MissingPermission")
     override fun writeCharacteristic(
         characteristic: BluetoothGattCharacteristic,
         data: ByteArray
     ): Flow<ByteArray> {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            throw Exception("Permission not granted")
-        }
+        checkService.beforeBluetoothFlow()
+
         if(gatt == null) {
             throw Exception("Gatt is null")
         }
@@ -181,7 +174,7 @@ class BluetoothLeServiceImpl @Inject constructor(
             }
         }
 
-        return gattCallback.onCharacteristicChanged
+        return callback.onCharacteristicChanged
     }
 
 }

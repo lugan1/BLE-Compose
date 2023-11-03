@@ -1,6 +1,7 @@
 package com.softnet.blecompose
 
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -26,12 +27,12 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private var connectServiceImpl : TestServiceImpl? = null
+    private var connectServiceImpl : BLEBoundService? = null
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Log.e("MainActivity", "onServiceConnected: ")
-            val binder = service as TestServiceImpl.LocalBinder
+            val binder = service as BLEBoundService.LocalBinder
             binder.getService().let { bindService -> connectServiceImpl = bindService }
         }
 
@@ -52,7 +53,7 @@ class MainActivity : ComponentActivity() {
 
             MainScreen(
                 bindService = {
-                    val gattServiceIntent = Intent(this, TestServiceImpl::class.java)
+                    val gattServiceIntent = Intent(this, BLEBoundService::class.java)
                     bindService(gattServiceIntent, serviceConnection, BIND_AUTO_CREATE)
                 },
                 connect = {
@@ -61,18 +62,7 @@ class MainActivity : ComponentActivity() {
                             service.connect("D3:72:6C:76:16:63")
                                 .filter { it == ConnectionState.Connected }
                                 .flatMapConcat { service.discoverServices() }
-                                .flatMapConcat { services ->
-                                    val nordicService = services.find { it.uuid.toString() == ServiceUUID.NORDIC_UART_SERVICE.uuid }
-                                    val flow: Flow<Unit>? = nordicService?.let {
-                                        rxCharacteristic = it.characteristics.find { it.uuid.toString() == CharacteristicUUID.RX_CHARACTERISTIC.uuid }
-                                        val txCharacteristic = it.characteristics.find { it.uuid.toString() == CharacteristicUUID.TX_CHARACTERISTIC.uuid }
-                                        val descriptor = txCharacteristic?.descriptors?.find { it.uuid.toString() == DescriptorUUID.CLIENT_CHARACTERISTIC_CONFIGURATION.uuid }
-                                        descriptor?.let {
-                                            connectServiceImpl?.characteristicNotification(txCharacteristic, descriptor, true)
-                                        }
-                                    }
-                                    flow ?: flow { emit(Unit) }
-                                }
+                                .flatMapConcat { services -> setupNotificationForUartService(services) }
                                 .collect {
                                     Log.e("MainActivity", "onCreate: $it")
                                 }
@@ -99,5 +89,15 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService(serviceConnection)
+    }
+
+    private suspend fun setupNotificationForUartService(services: List<BluetoothGattService>): Flow<Unit> {
+        val nordicService = services.find { it.uuid.toString() == ServiceUUID.NORDIC_UART_SERVICE.uuid }
+        return nordicService?.let { service ->
+            rxCharacteristic = service.characteristics.find { ct -> ct.uuid.toString() == CharacteristicUUID.RX_CHARACTERISTIC.uuid }
+            val txCharacteristic = service.characteristics.find { ct -> ct.uuid.toString() == CharacteristicUUID.TX_CHARACTERISTIC.uuid }
+            val descriptor = txCharacteristic?.descriptors?.find { dst -> dst.uuid.toString() == DescriptorUUID.CLIENT_CHARACTERISTIC_CONFIGURATION.uuid }
+            descriptor?.let { connectServiceImpl?.characteristicNotification(txCharacteristic, it, true) }
+        } ?: flow { emit(Unit) }
     }
 }
