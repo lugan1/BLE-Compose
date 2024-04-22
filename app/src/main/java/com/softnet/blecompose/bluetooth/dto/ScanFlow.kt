@@ -2,7 +2,7 @@ package com.softnet.blecompose.bluetooth.dto
 
 import android.annotation.SuppressLint
 import android.bluetooth.le.*
-import com.softnet.temperature.core.bluetooth.callback.scanCallback
+import com.softnet.blecompose.bluetooth.callback.ScanCallbackImpl
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -12,13 +12,10 @@ fun BluetoothLeScanner.scanAsFlow(
     beforeScanning: () -> Unit = {},
     filters: List<ScanFilter>,
     settings: ScanSettings,
+    callback: ScanCallback = ScanCallbackImpl(),
     onScanClosed: () -> Unit = {}
 ): Flow<ScanResult> = callbackFlow {
     beforeScanning()
-
-    this.scanCallback()
-
-    val callback = scanCallback()
 
     startScan(filters, settings, callback)
 
@@ -30,12 +27,11 @@ fun BluetoothLeScanner.scanAsFlow(
 
 @SuppressLint("MissingPermission")
 fun BluetoothLeScanner.scanAsFlow(
+    callback: ScanCallback = ScanCallbackImpl(),
     beforeScanning: () -> Unit = {},
     onScanClosed: () -> Unit = {}
 ): Flow<ScanResult> = callbackFlow {
     beforeScanning()
-
-    val callback = scanCallback()
 
     startScan(callback)
 

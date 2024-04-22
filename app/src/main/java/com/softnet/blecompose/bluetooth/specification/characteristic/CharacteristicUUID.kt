@@ -44,7 +44,7 @@ enum class CharacteristicUUID(val uuid: String) {
 
     companion object {
         fun from(uuid: String): CharacteristicUUID {
-            return values().find { it.uuid == uuid } ?: throw IllegalArgumentException("Unknown UUID $uuid")
+            return entries.find { it.uuid == uuid } ?: throw IllegalArgumentException("Unknown UUID $uuid")
         }
     }
 }

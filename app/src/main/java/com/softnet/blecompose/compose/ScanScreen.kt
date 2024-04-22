@@ -17,7 +17,8 @@ import androidx.compose.ui.unit.dp
 fun ScanScreen(
     bindService: () -> Unit = {},
     onScan: () -> Unit = {},
-    onStop: () -> Unit = {}
+    onStop: () -> Unit = {},
+    moveToMainScreen: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -35,6 +36,10 @@ fun ScanScreen(
 
         Button(onClick = onStop) {
             Text(text = "Stop")
+        }
+
+        Button(onClick = moveToMainScreen) {
+            Text(text = "Move To Main Screen")
         }
     }
 }
